@@ -5,7 +5,7 @@ Federal Reserve's 2024 penalty against Citigroup for "insufficient progress reme
 data-quality-management deficiencies." This project touches no real institution's systems,
 data, or personnel — it's a from-scratch, 100% synthetic demo.
 
-**Live demo:** _add your GitHub Pages URL here after deploying_
+**Live demo:** https://siddharth-14.github.io/Data-Quality-Lineage-Scorecard/
 
 **100% synthetic data.** No real financial institution's data, systems, or personnel are used
 or referenced anywhere in this repo.
