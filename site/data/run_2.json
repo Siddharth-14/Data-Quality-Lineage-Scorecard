@@ -1,0 +1,573 @@
+{
+  "run_id": 2,
+  "as_of_date": "2025-01-08",
+  "lineage_events": [
+    {
+      "eventType": "START",
+      "eventTime": "2025-01-08T02:00:00+00:00",
+      "producer": "https://github.com/openlineage/openlineage/tree/main/client/python",
+      "schemaURL": "https://openlineage.io/spec/2-0-2/OpenLineage.json#/definitions/RunEvent",
+      "run": {
+        "runId": "9f813136-f147-5eb8-8e63-f1ddeed960dc",
+        "facets": {}
+      },
+      "job": {
+        "namespace": "synthetic-bank",
+        "name": "build_regulatory_extract",
+        "facets": {}
+      },
+      "inputs": [
+        {
+          "namespace": "loan-origination-system",
+          "name": "loan_originations",
+          "facets": {
+            "schema": {
+              "_producer": "https://github.com/openlineage/openlineage/tree/main/client/python",
+              "_schemaURL": "https://openlineage.io/spec/2-0-2/OpenLineage.json#/definitions/SchemaDatasetFacet",
+              "fields": [
+                {
+                  "name": "loan_id",
+                  "type": "string"
+                },
+                {
+                  "name": "customer_id",
+                  "type": "string"
+                },
+                {
+                  "name": "origination_date",
+                  "type": "string"
+                },
+                {
+                  "name": "principal",
+                  "type": "double"
+                },
+                {
+                  "name": "product_type",
+                  "type": "string"
+                },
+                {
+                  "name": "branch_system_id",
+                  "type": "string"
+                }
+              ]
+            },
+            "dataQualityMetrics": {
+              "_producer": "https://github.com/openlineage/openlineage/tree/main/client/python",
+              "_schemaURL": "https://openlineage.io/spec/2-0-2/OpenLineage.json#/definitions/DataQualityMetricsInputDatasetFacet",
+              "rowCount": 1500,
+              "score": 92.38,
+              "verdict": "PASS",
+              "failedChecks": [
+                "completeness",
+                "freshness",
+                "reconciliation"
+              ]
+            }
+          }
+        },
+        {
+          "namespace": "core-banking-system",
+          "name": "account_master",
+          "facets": {
+            "schema": {
+              "_producer": "https://github.com/openlineage/openlineage/tree/main/client/python",
+              "_schemaURL": "https://openlineage.io/spec/2-0-2/OpenLineage.json#/definitions/SchemaDatasetFacet",
+              "fields": [
+                {
+                  "name": "account_id",
+                  "type": "string"
+                },
+                {
+                  "name": "customer_id",
+                  "type": "string"
+                },
+                {
+                  "name": "opened_date",
+                  "type": "string"
+                },
+                {
+                  "name": "status",
+                  "type": "string"
+                },
+                {
+                  "name": "last_updated_ts",
+                  "type": "timestamp"
+                }
+              ]
+            },
+            "dataQualityMetrics": {
+              "_producer": "https://github.com/openlineage/openlineage/tree/main/client/python",
+              "_schemaURL": "https://openlineage.io/spec/2-0-2/OpenLineage.json#/definitions/DataQualityMetricsInputDatasetFacet",
+              "rowCount": 1800,
+              "score": 89.66,
+              "verdict": "AT RISK",
+              "failedChecks": [
+                "referential_integrity",
+                "freshness",
+                "reconciliation"
+              ]
+            }
+          }
+        },
+        {
+          "namespace": "transaction-processing-system",
+          "name": "transactions",
+          "facets": {
+            "schema": {
+              "_producer": "https://github.com/openlineage/openlineage/tree/main/client/python",
+              "_schemaURL": "https://openlineage.io/spec/2-0-2/OpenLineage.json#/definitions/SchemaDatasetFacet",
+              "fields": [
+                {
+                  "name": "transaction_id",
+                  "type": "string"
+                },
+                {
+                  "name": "account_id",
+                  "type": "string"
+                },
+                {
+                  "name": "amount",
+                  "type": "double"
+                },
+                {
+                  "name": "ts",
+                  "type": "timestamp"
+                },
+                {
+                  "name": "system_of_record",
+                  "type": "string"
+                }
+              ]
+            },
+            "dataQualityMetrics": {
+              "_producer": "https://github.com/openlineage/openlineage/tree/main/client/python",
+              "_schemaURL": "https://openlineage.io/spec/2-0-2/OpenLineage.json#/definitions/DataQualityMetricsInputDatasetFacet",
+              "rowCount": 6000,
+              "score": 86.28,
+              "verdict": "AT RISK",
+              "failedChecks": [
+                "referential_integrity",
+                "reconciliation"
+              ]
+            }
+          }
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "eventType": "COMPLETE",
+      "eventTime": "2025-01-08T02:07:00+00:00",
+      "producer": "https://github.com/openlineage/openlineage/tree/main/client/python",
+      "schemaURL": "https://openlineage.io/spec/2-0-2/OpenLineage.json#/definitions/RunEvent",
+      "run": {
+        "runId": "9f813136-f147-5eb8-8e63-f1ddeed960dc",
+        "facets": {}
+      },
+      "job": {
+        "namespace": "synthetic-bank",
+        "name": "build_regulatory_extract",
+        "facets": {}
+      },
+      "inputs": [
+        {
+          "namespace": "loan-origination-system",
+          "name": "loan_originations",
+          "facets": {
+            "schema": {
+              "_producer": "https://github.com/openlineage/openlineage/tree/main/client/python",
+              "_schemaURL": "https://openlineage.io/spec/2-0-2/OpenLineage.json#/definitions/SchemaDatasetFacet",
+              "fields": [
+                {
+                  "name": "loan_id",
+                  "type": "string"
+                },
+                {
+                  "name": "customer_id",
+                  "type": "string"
+                },
+                {
+                  "name": "origination_date",
+                  "type": "string"
+                },
+                {
+                  "name": "principal",
+                  "type": "double"
+                },
+                {
+                  "name": "product_type",
+                  "type": "string"
+                },
+                {
+                  "name": "branch_system_id",
+                  "type": "string"
+                }
+              ]
+            },
+            "dataQualityMetrics": {
+              "_producer": "https://github.com/openlineage/openlineage/tree/main/client/python",
+              "_schemaURL": "https://openlineage.io/spec/2-0-2/OpenLineage.json#/definitions/DataQualityMetricsInputDatasetFacet",
+              "rowCount": 1500,
+              "score": 92.38,
+              "verdict": "PASS",
+              "failedChecks": [
+                "completeness",
+                "freshness",
+                "reconciliation"
+              ]
+            }
+          }
+        },
+        {
+          "namespace": "core-banking-system",
+          "name": "account_master",
+          "facets": {
+            "schema": {
+              "_producer": "https://github.com/openlineage/openlineage/tree/main/client/python",
+              "_schemaURL": "https://openlineage.io/spec/2-0-2/OpenLineage.json#/definitions/SchemaDatasetFacet",
+              "fields": [
+                {
+                  "name": "account_id",
+                  "type": "string"
+                },
+                {
+                  "name": "customer_id",
+                  "type": "string"
+                },
+                {
+                  "name": "opened_date",
+                  "type": "string"
+                },
+                {
+                  "name": "status",
+                  "type": "string"
+                },
+                {
+                  "name": "last_updated_ts",
+                  "type": "timestamp"
+                }
+              ]
+            },
+            "dataQualityMetrics": {
+              "_producer": "https://github.com/openlineage/openlineage/tree/main/client/python",
+              "_schemaURL": "https://openlineage.io/spec/2-0-2/OpenLineage.json#/definitions/DataQualityMetricsInputDatasetFacet",
+              "rowCount": 1800,
+              "score": 89.66,
+              "verdict": "AT RISK",
+              "failedChecks": [
+                "referential_integrity",
+                "freshness",
+                "reconciliation"
+              ]
+            }
+          }
+        },
+        {
+          "namespace": "transaction-processing-system",
+          "name": "transactions",
+          "facets": {
+            "schema": {
+              "_producer": "https://github.com/openlineage/openlineage/tree/main/client/python",
+              "_schemaURL": "https://openlineage.io/spec/2-0-2/OpenLineage.json#/definitions/SchemaDatasetFacet",
+              "fields": [
+                {
+                  "name": "transaction_id",
+                  "type": "string"
+                },
+                {
+                  "name": "account_id",
+                  "type": "string"
+                },
+                {
+                  "name": "amount",
+                  "type": "double"
+                },
+                {
+                  "name": "ts",
+                  "type": "timestamp"
+                },
+                {
+                  "name": "system_of_record",
+                  "type": "string"
+                }
+              ]
+            },
+            "dataQualityMetrics": {
+              "_producer": "https://github.com/openlineage/openlineage/tree/main/client/python",
+              "_schemaURL": "https://openlineage.io/spec/2-0-2/OpenLineage.json#/definitions/DataQualityMetricsInputDatasetFacet",
+              "rowCount": 6000,
+              "score": 86.28,
+              "verdict": "AT RISK",
+              "failedChecks": [
+                "referential_integrity",
+                "reconciliation"
+              ]
+            }
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "namespace": "synthetic-bank",
+          "name": "regulatory_extract",
+          "facets": {
+            "schema": {
+              "_producer": "https://github.com/openlineage/openlineage/tree/main/client/python",
+              "_schemaURL": "https://openlineage.io/spec/2-0-2/OpenLineage.json#/definitions/SchemaDatasetFacet",
+              "fields": [
+                {
+                  "name": "customer_id",
+                  "type": "string"
+                },
+                {
+                  "name": "loan_principal_total",
+                  "type": "double"
+                },
+                {
+                  "name": "transaction_amount_total",
+                  "type": "double"
+                },
+                {
+                  "name": "reported_total",
+                  "type": "double"
+                }
+              ]
+            },
+            "dataQualityMetrics": {
+              "_producer": "https://github.com/openlineage/openlineage/tree/main/client/python",
+              "_schemaURL": "https://openlineage.io/spec/2-0-2/OpenLineage.json#/definitions/DataQualityMetricsInputDatasetFacet",
+              "rowCount": 1106,
+              "score": 96.76,
+              "verdict": "PASS",
+              "failedChecks": [
+                "reconciliation"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "quality": {
+    "tables": {
+      "loan_originations": {
+        "score": 92.38,
+        "row_count": 1500,
+        "checks": [
+          {
+            "element_count": 1500,
+            "unexpected_count": 176,
+            "unexpected_percent": 11.733333333333333,
+            "score": 88.27,
+            "category": "completeness",
+            "description": "176 of 1500 loan_originations rows are missing a customer_id (11.7%)"
+          },
+          {
+            "element_count": 1324,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "score": 100.0,
+            "category": "referential_integrity",
+            "description": "0 of 1324 loan_originations rows reference a customer_id not found in the canonical customer table (0.0%)"
+          },
+          {
+            "element_count": 1500,
+            "unexpected_count": 105,
+            "unexpected_percent": 7.000000000000001,
+            "score": 93.0,
+            "category": "freshness",
+            "description": "105 of 1500 loan_originations rows are dated in the future (7.0%)"
+          },
+          {
+            "element_count": 1500,
+            "unexpected_count": 176,
+            "unexpected_percent": 11.7333,
+            "score": 88.27,
+            "category": "reconciliation",
+            "description": "$45,393,829.36 of loan principal (176 of 1500 rows) never made it into regulatory_extract because the customer_id could not be resolved"
+          }
+        ]
+      },
+      "account_master": {
+        "score": 89.66,
+        "row_count": 1800,
+        "checks": [
+          {
+            "element_count": 1800,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "score": 100.0,
+            "category": "completeness",
+            "description": "0 of 1800 account_master rows are missing a customer_id (0.0%)"
+          },
+          {
+            "element_count": 1800,
+            "unexpected_count": 188,
+            "unexpected_percent": 10.444444444444445,
+            "score": 89.56,
+            "category": "referential_integrity",
+            "description": "188 of 1800 account_master rows reference a customer_id not found in the canonical customer table (10.4%)"
+          },
+          {
+            "element_count": 1800,
+            "unexpected_count": 369,
+            "unexpected_percent": 20.5,
+            "score": 79.5,
+            "category": "freshness",
+            "description": "369 of 1800 account_master rows are older than the 180-day freshness SLA (20.5%)"
+          },
+          {
+            "element_count": 1800,
+            "unexpected_count": 188,
+            "unexpected_percent": 10.4444,
+            "score": 89.56,
+            "category": "reconciliation",
+            "description": "188 of 1800 account_master rows reference a customer_id that doesn't exist, so those accounts are silently excluded from regulatory_extract"
+          }
+        ]
+      },
+      "transactions": {
+        "score": 86.28,
+        "row_count": 6000,
+        "checks": [
+          {
+            "element_count": 6000,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "score": 100.0,
+            "category": "completeness",
+            "description": "0 of 6000 transactions rows are missing an account_id (0.0%)"
+          },
+          {
+            "element_count": 6000,
+            "unexpected_count": 1632,
+            "unexpected_percent": 27.200000000000003,
+            "score": 72.8,
+            "category": "referential_integrity",
+            "description": "1632 of 6000 transactions rows reference an account_id not found in account_master (27.2%)"
+          },
+          {
+            "element_count": 6000,
+            "unexpected_count": 29,
+            "unexpected_percent": 0.48333333333333334,
+            "score": 99.52,
+            "category": "freshness",
+            "description": "29 of 6000 transactions rows are older than the 120-day freshness SLA (0.5%)"
+          },
+          {
+            "element_count": 6000,
+            "unexpected_count": 1632,
+            "unexpected_percent": 27.2,
+            "score": 72.8,
+            "category": "reconciliation",
+            "description": "$7,947,960.92 of transaction volume (1632 of 6000 rows) never made it into regulatory_extract because the account_id doesn't exist in account_master"
+          }
+        ]
+      },
+      "regulatory_extract": {
+        "score": 96.76,
+        "row_count": 1106,
+        "checks": [
+          {
+            "element_count": 1106,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "score": 100.0,
+            "category": "completeness",
+            "description": "0 of 1106 regulatory_extract rows are missing a customer_id (0.0%)"
+          },
+          {
+            "element_count": 1106,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "score": 100.0,
+            "category": "referential_integrity",
+            "description": "0 of 1106 regulatory_extract rows reference a customer_id not found in the canonical customer table (0.0%)"
+          },
+          {
+            "element_count": 1106,
+            "unexpected_count": 0,
+            "unexpected_percent": 0.0,
+            "score": 100.0,
+            "category": "freshness",
+            "description": "regulatory_extract was generated as of 2025-01-08 with no stale rows"
+          },
+          {
+            "element_count": 0,
+            "unexpected_count": 0,
+            "unexpected_percent": 12.956,
+            "score": 87.04,
+            "category": "reconciliation",
+            "description": "regulatory_extract undercounts total reported amount by $53,341,790.28 (12.96%) compared to raw source aggregates due to unresolved foreign keys"
+          }
+        ]
+      }
+    },
+    "aggregate_score": 91.27,
+    "aggregate_verdict": "PASS",
+    "reconciliation_gap_pct": 12.96,
+    "reconciliation_gap_amount": 53341790.28,
+    "failing_checks": [
+      {
+        "table": "loan_originations",
+        "category": "completeness",
+        "description": "176 of 1500 loan_originations rows are missing a customer_id (11.7%)",
+        "score": 88.27
+      },
+      {
+        "table": "loan_originations",
+        "category": "freshness",
+        "description": "105 of 1500 loan_originations rows are dated in the future (7.0%)",
+        "score": 93.0
+      },
+      {
+        "table": "loan_originations",
+        "category": "reconciliation",
+        "description": "$45,393,829.36 of loan principal (176 of 1500 rows) never made it into regulatory_extract because the customer_id could not be resolved",
+        "score": 88.27
+      },
+      {
+        "table": "account_master",
+        "category": "referential_integrity",
+        "description": "188 of 1800 account_master rows reference a customer_id not found in the canonical customer table (10.4%)",
+        "score": 89.56
+      },
+      {
+        "table": "account_master",
+        "category": "freshness",
+        "description": "369 of 1800 account_master rows are older than the 180-day freshness SLA (20.5%)",
+        "score": 79.5
+      },
+      {
+        "table": "account_master",
+        "category": "reconciliation",
+        "description": "188 of 1800 account_master rows reference a customer_id that doesn't exist, so those accounts are silently excluded from regulatory_extract",
+        "score": 89.56
+      },
+      {
+        "table": "transactions",
+        "category": "referential_integrity",
+        "description": "1632 of 6000 transactions rows reference an account_id not found in account_master (27.2%)",
+        "score": 72.8
+      },
+      {
+        "table": "transactions",
+        "category": "reconciliation",
+        "description": "$7,947,960.92 of transaction volume (1632 of 6000 rows) never made it into regulatory_extract because the account_id doesn't exist in account_master",
+        "score": 72.8
+      },
+      {
+        "table": "regulatory_extract",
+        "category": "reconciliation",
+        "description": "regulatory_extract undercounts total reported amount by $53,341,790.28 (12.96%) compared to raw source aggregates due to unresolved foreign keys",
+        "score": 87.04
+      }
+    ]
+  },
+  "source_row_counts": {
+    "loan_originations": 1500,
+    "account_master": 1800,
+    "transactions": 6000,
+    "regulatory_extract": 1106
+  }
+}

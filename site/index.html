@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Data Quality &amp; Lineage Scorecard</title>
+<script src="vendor/cytoscape.min.js"></script>
+<script src="vendor/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #0f1420;
+    --panel: #161d2e;
+    --panel-border: #263049;
+    --text: #e7ecf7;
+    --text-dim: #a6b0c8;
+    --accent: #5b8cff;
+    --pass: #33c07a;
+    --at-risk: #e8ab2e;
+    --fail: #e8544a;
+    --job-node: #6b7590;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f4f6fb;
+      --panel: #ffffff;
+      --panel-border: #dde3f0;
+      --text: #1a2032;
+      --text-dim: #5b6478;
+      --accent: #3763e0;
+      --pass: #1f9d5c;
+      --at-risk: #b9790a;
+      --fail: #c03a30;
+      --job-node: #8890a5;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 16px clamp(16px, 4vw, 40px) 40px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  header {
+    max-width: 1200px;
+    margin: 0 auto 18px;
+  }
+  header h1 {
+    margin: 0 0 6px;
+    font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+  }
+  header p.framing {
+    margin: 0 0 8px;
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    max-width: 760px;
+  }
+  .disclaimer {
+    display: inline-block;
+    font-size: 0.78rem;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(91, 140, 255, 0.12);
+    color: var(--accent);
+    border: 1px solid rgba(91, 140, 255, 0.35);
+  }
+  .headline {
+    max-width: 1200px;
+    margin: 0 auto 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .stat-tile {
+    flex: 1 1 200px;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 12px 16px;
+  }
+  .stat-tile .label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+  }
+  .stat-tile .value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .stat-tile .sub {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .badge.PASS { background: rgba(51, 192, 122, 0.16); color: var(--pass); }
+  .badge.AT_RISK { background: rgba(232, 171, 46, 0.16); color: var(--at-risk); }
+  .badge.FAIL { background: rgba(232, 84, 74, 0.16); color: var(--fail); }
+
+  .main-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) minmax(300px, 1.1fr);
+    gap: 16px;
+  }
+  @media (max-width: 820px) {
+    .main-grid { grid-template-columns: 1fr; }
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .panel h2 {
+    margin: 0 0 4px;
+    font-size: 1.05rem;
+  }
+  .panel .panel-caption {
+    margin: 0 0 12px;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+  }
+  #lineage-graph {
+    width: 100%;
+    height: 380px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.02);
+  }
+  .legend {
+    display: flex;
+    gap: 14px;
+    margin-top: 10px;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    flex-wrap: wrap;
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+  .score-card {
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
+  .score-card.highlight {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(91,140,255,0.25);
+  }
+  .score-card summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .score-card summary::-webkit-details-marker { display: none; }
+  .score-card .table-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .score-card .table-sub {
+    font-size: 0.74rem;
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+  .score-card .score-num {
+    font-weight: 700;
+    font-size: 1.05rem;
+    min-width: 3.4em;
+    text-align: right;
+  }
+  .score-card ul {
+    margin: 10px 0 2px;
+    padding-left: 18px;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+  .score-card ul li { margin-bottom: 5px; }
+  .score-card .all-clear {
+    margin: 10px 0 2px;
+    font-size: 0.85rem;
+    color: var(--pass);
+  }
+
+  .run-selector {
+    max-width: 1200px;
+    margin: 18px auto 0;
+  }
+  .run-selector .row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .run-btn {
+    border: 1px solid var(--panel-border);
+    background: var(--panel);
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .run-btn.active {
+    border-color: var(--accent);
+    background: rgba(91,140,255,0.14);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  #trend-chart-wrap { height: 160px; }
+  footer {
+    max-width: 1200px;
+    margin: 24px auto 0;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Data Quality &amp; Lineage Scorecard</h1>
+  <p class="framing">
+    An always-on alternative to point-in-time compliance audits: this dashboard continuously
+    scores three synthetic banking systems and the regulatory extract they feed, catching
+    data-quality deficiencies as they happen instead of once a year.
+  </p>
+  <span class="disclaimer">100% synthetic data &mdash; no real financial institution's data, systems, or personnel are used or referenced.</span>
+</header>
+
+<div class="headline">
+  <div class="stat-tile">
+    <div class="label">Reconciliation Gap</div>
+    <div class="value" id="stat-recon-pct">&mdash;</div>
+    <div class="sub" id="stat-recon-amount">&mdash;</div>
+  </div>
+  <div class="stat-tile">
+    <div class="label">Aggregate Readiness</div>
+    <div class="value"><span class="badge" id="stat-verdict-badge">&mdash;</span></div>
+    <div class="sub" id="stat-aggregate-score">&mdash;</div>
+  </div>
+  <div class="stat-tile">
+    <div class="label">Run Selected</div>
+    <div class="value" id="stat-run-id">&mdash;</div>
+    <div class="sub" id="stat-as-of">&mdash;</div>
+  </div>
+</div>
+
+<div class="main-grid">
+  <section class="panel">
+    <h2>Lineage Graph</h2>
+    <p class="panel-caption">Rendered from real OpenLineage RunEvent JSON for this run &mdash; nodes colored by each dataset's current quality score.</p>
+    <div id="lineage-graph"></div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--pass)"></span>PASS &ge; 90</span>
+      <span><span class="dot" style="background:var(--at-risk)"></span>AT RISK 75&ndash;89</span>
+      <span><span class="dot" style="background:var(--fail)"></span>FAIL &lt; 75</span>
+      <span><span class="dot" style="background:var(--job-node)"></span>transform job</span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Per-Table Scorecard</h2>
+    <p class="panel-caption">Score = average of completeness, referential integrity, freshness, and reconciliation checks. Click a check list to expand.</p>
+    <div id="scorecard-list"></div>
+  </section>
+</div>
+
+<div class="run-selector">
+  <section class="panel">
+    <h2 style="margin-bottom:10px;">Run Selector</h2>
+    <div class="row" id="run-buttons"></div>
+    <div id="trend-chart-wrap"><canvas id="trend-chart"></canvas></div>
+  </section>
+</div>
+
+<footer>
+  Data pipeline: Faker-generated source tables &rarr; pandas transform &rarr; Great Expectations checks &rarr; OpenLineage events.
+  See <code>data-pipeline/</code> in the repo to regenerate. All 5 runs are pre-computed and committed &mdash; nothing here calls a live backend.
+</footer>
+
+<script>
+const RUN_IDS = [1, 2, 3, 4, 5];
+const runsData = {};
+let currentRun = RUN_IDS[0];
+let cy = null;
+let trendChart = null;
+
+function verdictBand(score) {
+  if (score >= 90) return "PASS";
+  if (score >= 75) return "AT RISK";
+  return "FAIL";
+}
+function verdictColorVar(verdict) {
+  if (verdict === "PASS") return "var(--pass)";
+  if (verdict === "AT RISK") return "var(--at-risk)";
+  return "var(--fail)";
+}
+function verdictHex(verdict, isDark) {
+  const palette = isDark
+    ? { "PASS": "#33c07a", "AT RISK": "#e8ab2e", "FAIL": "#e8544a" }
+    : { "PASS": "#1f9d5c", "AT RISK": "#b9790a", "FAIL": "#c03a30" };
+  return palette[verdict] || palette["FAIL"];
+}
+function isDarkMode() {
+  return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+function prettyName(name) {
+  return name.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+async function loadAllRuns() {
+  const results = await Promise.all(
+    RUN_IDS.map((id) => fetch(`data/run_${id}.json`).then((r) => r.json()))
+  );
+  RUN_IDS.forEach((id, i) => { runsData[id] = results[i]; });
+}
+
+function buildGraphElements(run) {
+  const completeEvent = run.lineage_events.find((e) => e.eventType === "COMPLETE");
+  const job = completeEvent.job;
+  const elements = [];
+  const jobId = `job:${job.name}`;
+
+  elements.push({
+    data: { id: jobId, label: prettyName(job.name), kind: "job" },
+  });
+
+  completeEvent.inputs.forEach((ds) => {
+    const dq = ds.facets && ds.facets.dataQualityMetrics;
+    const score = dq ? dq.score : null;
+    const verdict = dq ? dq.verdict : "PASS";
+    elements.push({
+      data: {
+        id: ds.name,
+        label: `${prettyName(ds.name)}\n${score != null ? score.toFixed(1) : "?"}`,
+        kind: "dataset",
+        namespace: ds.namespace,
+        score,
+        verdict,
+      },
+    });
+    elements.push({ data: { id: `${ds.name}->${jobId}`, source: ds.name, target: jobId } });
+  });
+
+  completeEvent.outputs.forEach((ds) => {
+    const dq = ds.facets && ds.facets.dataQualityMetrics;
+    const score = dq ? dq.score : null;
+    const verdict = dq ? dq.verdict : "PASS";
+    elements.push({
+      data: {
+        id: ds.name,
+        label: `${prettyName(ds.name)}\n${score != null ? score.toFixed(1) : "?"}`,
+        kind: "dataset",
+        namespace: ds.namespace,
+        score,
+        verdict,
+      },
+    });
+    elements.push({ data: { id: `${jobId}->${ds.name}`, source: jobId, target: ds.name } });
+  });
+
+  return elements;
+}
+
+function initGraph(run) {
+  const dark = isDarkMode();
+  const elements = buildGraphElements(run);
+
+  cy = cytoscape({
+    container: document.getElementById("lineage-graph"),
+    elements,
+    style: [
+      {
+        selector: 'node[kind = "dataset"]',
+        style: {
+          "shape": "round-rectangle",
+          "background-color": (el) => verdictHex(el.data("verdict"), dark),
+          "label": "data(label)",
+          "text-wrap": "wrap",
+          "text-valign": "center",
+          "text-halign": "center",
+          "color": "#0b0f18",
+          "font-size": 11,
+          "font-weight": 600,
+          "width": 130,
+          "height": 46,
+          "text-max-width": "120px",
+        },
+      },
+      {
+        selector: 'node[kind = "job"]',
+        style: {
+          "shape": "diamond",
+          "background-color": dark ? "#6b7590" : "#8890a5",
+          "label": "data(label)",
+          "color": dark ? "#0b0f18" : "#ffffff",
+          "font-size": 9,
+          "text-wrap": "wrap",
+          "text-max-width": "70px",
+          "width": 70,
+          "height": 70,
+          "text-valign": "center",
+          "text-halign": "center",
+        },
+      },
+      {
+        selector: "edge",
+        style: {
+          "width": 2,
+          "line-color": dark ? "#3a4560" : "#c4cce0",
+          "target-arrow-color": dark ? "#3a4560" : "#c4cce0",
+          "target-arrow-shape": "triangle",
+          "curve-style": "bezier",
+        },
+      },
+    ],
+    layout: {
+      name: "breadthfirst",
+      directed: true,
+      roots: run.lineage_events[1].inputs.map((d) => d.name),
+      spacingFactor: 1.3,
+      fit: true,
+      padding: 20,
+    },
+    userZoomingEnabled: false,
+    userPanningEnabled: false,
+    boxSelectionEnabled: false,
+  });
+
+  cy.on("tap", 'node[kind = "dataset"]', (evt) => {
+    const tableName = evt.target.id();
+    highlightScorecard(tableName);
+  });
+}
+
+function updateGraph(run) {
+  if (!cy) { initGraph(run); return; }
+  const dark = isDarkMode();
+  const elements = buildGraphElements(run);
+  const byId = {};
+  elements.forEach((el) => { byId[el.data.id] = el.data; });
+
+  cy.nodes().forEach((node) => {
+    const data = byId[node.id()];
+    if (data) {
+      node.data(data);
+      if (data.kind === "dataset") {
+        node.style("background-color", verdictHex(data.verdict, dark));
+      }
+    }
+  });
+}
+
+function highlightScorecard(tableName) {
+  document.querySelectorAll(".score-card").forEach((el) => el.classList.remove("highlight"));
+  const target = document.getElementById(`card-${tableName}`);
+  if (target) {
+    target.classList.add("highlight");
+    target.open = true;
+    target.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    setTimeout(() => target.classList.remove("highlight"), 1800);
+  }
+}
+
+function renderScorecard(run) {
+  const container = document.getElementById("scorecard-list");
+  container.innerHTML = "";
+  const tableOrder = ["loan_originations", "account_master", "transactions", "regulatory_extract"];
+
+  tableOrder.forEach((tableName) => {
+    const table = run.quality.tables[tableName];
+    if (!table) return;
+    const verdict = verdictBand(table.score);
+    const failing = table.checks.filter((c) => c.score < 99.5);
+
+    const details = document.createElement("details");
+    details.className = "score-card";
+    details.id = `card-${tableName}`;
+    details.open = failing.length > 0;
+
+    const summary = document.createElement("summary");
+    summary.innerHTML = `
+      <div>
+        <div class="table-name">${prettyName(tableName)}</div>
+        <div class="table-sub">${table.row_count.toLocaleString()} rows &middot; ${failing.length} check${failing.length === 1 ? "" : "s"} flagged</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="badge" style="background:transparent;border:1px solid ${verdictColorVar(verdict)};color:${verdictColorVar(verdict)}">${verdict}</span>
+        <span class="score-num" style="color:${verdictColorVar(verdict)}">${table.score.toFixed(1)}</span>
+      </div>
+    `;
+    details.appendChild(summary);
+
+    if (failing.length > 0) {
+      const ul = document.createElement("ul");
+      failing.forEach((c) => {
+        const li = document.createElement("li");
+        li.textContent = c.description;
+        ul.appendChild(li);
+      });
+      details.appendChild(ul);
+    } else {
+      const p = document.createElement("p");
+      p.className = "all-clear";
+      p.textContent = "All checks passed for this run.";
+      details.appendChild(p);
+    }
+
+    container.appendChild(details);
+  });
+}
+
+function renderHeadline(run) {
+  document.getElementById("stat-recon-pct").textContent = `${run.quality.reconciliation_gap_pct.toFixed(2)}%`;
+  document.getElementById("stat-recon-amount").textContent =
+    `$${Math.abs(run.quality.reconciliation_gap_amount).toLocaleString(undefined, { maximumFractionDigits: 0 })} unaccounted for vs. raw source totals`;
+
+  const verdict = run.quality.aggregate_verdict;
+  const badge = document.getElementById("stat-verdict-badge");
+  badge.textContent = verdict;
+  badge.className = `badge ${verdict.replace(" ", "_")}`;
+  document.getElementById("stat-aggregate-score").textContent = `Aggregate score: ${run.quality.aggregate_score.toFixed(1)} / 100`;
+
+  document.getElementById("stat-run-id").textContent = `Run ${run.run_id} of 5`;
+  document.getElementById("stat-as-of").textContent = `As of ${run.as_of_date}`;
+}
+
+function renderRunButtons() {
+  const wrap = document.getElementById("run-buttons");
+  wrap.innerHTML = "";
+  RUN_IDS.forEach((id) => {
+    const btn = document.createElement("button");
+    btn.className = "run-btn" + (id === currentRun ? " active" : "");
+    btn.textContent = `Run ${id}`;
+    btn.addEventListener("click", () => selectRun(id));
+    btn.id = `run-btn-${id}`;
+    wrap.appendChild(btn);
+  });
+}
+
+function updateRunButtonsActive() {
+  RUN_IDS.forEach((id) => {
+    document.getElementById(`run-btn-${id}`).classList.toggle("active", id === currentRun);
+  });
+}
+
+function buildTrendChart() {
+  const dark = isDarkMode();
+  const labels = RUN_IDS.map((id) => `Run ${id}`);
+  const scores = RUN_IDS.map((id) => runsData[id].quality.aggregate_score);
+  const colors = RUN_IDS.map((id) => verdictHex(runsData[id].quality.aggregate_verdict, dark));
+
+  trendChart = new Chart(document.getElementById("trend-chart"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Aggregate readiness score",
+          data: scores,
+          borderColor: dark ? "#5b8cff" : "#3763e0",
+          backgroundColor: "transparent",
+          pointBackgroundColor: colors,
+          pointBorderColor: colors,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+          tension: 0.25,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          min: 60,
+          max: 100,
+          ticks: { color: dark ? "#a6b0c8" : "#5b6478" },
+          grid: { color: dark ? "#263049" : "#dde3f0" },
+        },
+        x: {
+          ticks: { color: dark ? "#a6b0c8" : "#5b6478" },
+          grid: { display: false },
+        },
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const id = RUN_IDS[ctx.dataIndex];
+              return `Score ${ctx.parsed.y.toFixed(1)} (${runsData[id].quality.aggregate_verdict})`;
+            },
+          },
+        },
+      },
+      onClick: (evt, elements) => {
+        if (elements.length > 0) selectRun(RUN_IDS[elements[0].index]);
+      },
+    },
+  });
+}
+
+function selectRun(id) {
+  currentRun = id;
+  const run = runsData[id];
+  updateRunButtonsActive();
+  renderHeadline(run);
+  updateGraph(run);
+  renderScorecard(run);
+}
+
+async function main() {
+  await loadAllRuns();
+  renderRunButtons();
+  const firstRun = runsData[currentRun];
+  renderHeadline(firstRun);
+  initGraph(firstRun);
+  renderScorecard(firstRun);
+  buildTrendChart();
+}
+
+main().catch((err) => {
+  document.body.insertAdjacentHTML(
+    "afterbegin",
+    `<div style="background:#c03a30;color:#fff;padding:10px 16px;border-radius:8px;margin-bottom:10px;">Failed to load dashboard data: ${err.message}</div>`
+  );
+  console.error(err);
+});
+</script>
+
+</body>
+</html>
